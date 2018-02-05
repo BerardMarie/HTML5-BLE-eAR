@@ -154,6 +154,8 @@ Please enable Java script on your browser. </br>
 
 var tempData = [];
 var AccData = [];
+var GyrData = [];
+var MagData = [];
 
 function padHex(value) {
   return ('00' + value.toString(16).toUpperCase()).slice(-2);
@@ -192,7 +194,11 @@ function handleIMUNotifications(event) {
   LineGraph_Plot(1);  
   LineGraph_Plot(2);  
   acc = {acc1: ax, acc2: ay, acc3: az};
+  gyr = {gyx: gx, gyy: gy, gyz: gz};
+  mag = {magx: mx, magy: my, magz: mz};
   AccData.push(acc);
+  GyrData.push(gyr);
+  MagData.push(mag);
 }
 
 function handleTemperatureNotifications(event)
@@ -266,6 +272,49 @@ function downloadCSV_Acc(args) {
     var data, filename, link;
     var csv = convertArrayOfObjectsToCSV({
         data: AccData
+    });
+    console.log(csv);
+    if (csv == null) return;
+
+    filename = args.filename || 'export.csv';
+
+    if (!csv.match(/^data:text\/csv/i)) {
+        csv = 'data:text/csv;charset=utf-8,' + csv;
+    }
+    data = encodeURI(csv);
+
+    link = document.createElement('a');
+    link.setAttribute('href', data);
+    link.setAttribute('download', filename);
+    link.click();
+    tempData = [];
+}
+
+function downloadCSV_Mag(args) {  
+    var data, filename, link;
+    var csv = convertArrayOfObjectsToCSV({
+        data: MagData
+    });
+    console.log(csv);
+    if (csv == null) return;
+
+    filename = args.filename || 'export.csv';
+
+    if (!csv.match(/^data:text\/csv/i)) {
+        csv = 'data:text/csv;charset=utf-8,' + csv;
+    }
+    data = encodeURI(csv);
+
+    link = document.createElement('a');
+    link.setAttribute('href', data);
+    link.setAttribute('download', filename);
+    link.click();
+    tempData = [];
+}
+function downloadCSV_Gyr(args) {  
+    var data, filename, link;
+    var csv = convertArrayOfObjectsToCSV({
+        data: GyrData
     });
     console.log(csv);
     if (csv == null) return;
@@ -473,11 +522,21 @@ function getSupportedProperties(characteristic) {//find the details of a charact
 <input type="button" id="discover" value="Discover BLE devices" onclick="onDiscoverService();"/><br/>
 <a href='#' 
         onclick='downloadCSV_Acc({ filename: "Acc-data.csv" });'
-    >Download CSV _ Acc</a>
+    >Download CSV for Acceleration</a>
 
 <a href='#' 
         onclick='downloadCSV_Temp({ filename: "temperature-data.csv" });'
-    >Download CSV _ Temp</a>
+    >Download CSV for Temperature</a>
+
+<a href='#' 
+        onclick='downloadCSV_Mag({ filename: "Magnetometer-data.csv" });'
+    >Download CSV for Mag</a>
+
+<a href='#' 
+        onclick='downloadCSV_Gyr({ filename: "Gyroscope-data.csv" });'
+    >Download CSV for Gyre</a>
+
+
 <table id="canvastable" hidden="1">
  <tr><td>Accelerometer</td><td>Gyroscope</td></tr> <tr><td>
 <canvas id="left_accelerometer" width="512" height="240"></canvas></td><td><canvas id="right_accelerometer" width="512" height="240"></canvas></td></tr>
